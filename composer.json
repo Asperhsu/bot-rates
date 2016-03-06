@@ -1,0 +1,13 @@
+{
+    "authors": [
+        {
+            "name": "Asper Hsu",
+            "email": "asperwon@gmail.com"
+        }
+    ],
+	"autoload": {
+		"psr-4": {
+			"Asper\\" : "Asper"
+		}
+	}
+}
