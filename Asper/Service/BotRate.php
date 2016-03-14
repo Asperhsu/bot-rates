@@ -5,58 +5,18 @@ namespace Asper\Service;
 use Asper\Contract\Cacheable;
 
 class BotRate {
-	protected $cache=null;
-	protected $cacheExpireSec = 86400;	//24 hours
-
 	protected $botSourceSite = "http://rate.bot.com.tw";
 	protected $botSourceUrl = "Pages/Static/UIP003.zh-TW.htm";
 	protected $csvColumnNameMapping = [
 		'currency'=>0, 'buyCash'=>2, 'buySpot'=>3, 'sellCash'=>12, 'sellSpot'=>13
 	];
 
-	public function __construct(Cacheable $cache=null){		
-		$this->cache = $cache;
-		//$this->getRates();
+	public function __construct(){
+
 	}
 
-	public function getRates($cacheExpireSec=null){
-		if( is_null($this->cache) ){
-			return $this->fetchRateFromSource();
-		}
-
-		// using cache
-		$cacheExpireSec = $cacheExpireSec ?: $this->cacheExpireSec;
-		$createTime = intval($this->cache->get('createTime'));
-		$isExpired = ($createTime + $cacheExpireSec) < time();
-		
-		if( $isExpired ){
-			$data = $this->fetchRateFromSource();
-			$this->saveToCache($data, $cacheExpireSec);
-			return $data;
-		}
-
-		$data = $this->loadFromCache();
-		$data['createTime'] = $createTime;
-		return $data;
-	}
-
-	protected function saveToCache($data, $cacheExpireSec){
-		$rateJson = json_encode($data['rates']);
-		$this->cache->set('rates', $rateJson, $cacheExpireSec);
-
-		$this->cache->set('createTime', $data['createTime'], $cacheExpireSec);
-		$this->cache->set('updateTime', $data['updateTime'], $cacheExpireSec);
-	}
-
-	protected function loadFromCache(){
-		$updateTime = $this->cache->get('updateTime');
-		$rateJson = $this->cache->get('rates');
-		$rates = json_decode($rateJson, true);
-
-		return [
-			'updateTime' => $updateTime,
-			'rates'	=> $rates
-		];
+	public function getRates(){
+		return $this->fetchRateFromSource();
 	}
 
 	protected function fetchSourceHtml(){

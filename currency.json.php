@@ -3,10 +3,19 @@ require("vendor/autoload.php");
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Taipei');
 
+//retrive cache data
 $cache = new Asper\Util\MemCache();
-$botRate = new Asper\Service\BotRate($cache);
 
-$data = $botRate->getRates();
+$createTime = $cache->get('createTime');
+$updateTime = $cache->get('updateTime');
+$rateJson = $cache->get('rates');
+$rates = json_decode($rateJson, true);
+
+$data = [
+	'createTime' => $createTime,
+	'updateTime' => $updateTime,
+	'rates'	=> $rates
+];
 
 //check paremeter
 $currency = '';

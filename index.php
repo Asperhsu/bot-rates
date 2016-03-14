@@ -25,9 +25,19 @@ $currencyList = array(
 	'CNY' => '人民幣',		
 );
 
+//retrive cache data
 $cache = new Asper\Util\MemCache();
-$botRate = new Asper\Service\BotRate($cache);
-$data = $botRate->getRates();
+
+$createTime = $cache->get('createTime');
+$updateTime = $cache->get('updateTime');
+$rateJson = $cache->get('rates');
+$rates = json_decode($rateJson, true);
+
+$data = [
+	'createTime' => $createTime,
+	'updateTime' => $updateTime,
+	'rates'	=> $rates
+];
 
 ?>
 <!DOCTYPE html>
@@ -131,8 +141,10 @@ $data = $botRate->getRates();
 		<p style='text-align: center;'>
 			<a href="http://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm">資料來源: 台灣銀行</a> | 
 			更新時間：<?php echo date('Y-m-d H:i:s', $data['updateTime']);?> |
-			幣值為台幣(TWD)
+			幣值為台幣(TWD) | 幣值轉換僅供參考，實際請以銀行匯兌為準
 		</p>
+
+		<a href="https://github.com/Aspertw/bot-rates"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
 
 		<script src="//code.jquery.com/jquery.js"></script>
 		<script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>

@@ -1,10 +1,13 @@
 application: asper-bot-rates
-version: 1
+version: 2
 runtime: php55
 api_version: 1
 threadsafe: yes
 
 handlers:
+- url: /update
+  script: update.php
+
 - url: /currency.json
   script: currency.json.php
 
