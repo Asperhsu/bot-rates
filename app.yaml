@@ -13,3 +13,8 @@ handlers:
 
 - url: /.*
   script: index.php
+
+skip_files:
+- ^(.*/)?.*/node_modules/.*$
+- ^(node_modules/.*)
+- ^(.git/.*)
