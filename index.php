@@ -26,7 +26,7 @@ $currencyList = array(
 );
 
 //retrive cache data
-$cache = new Asper\Util\MemCache();
+$cache = new Asper\Util\GSJsonCache();
 
 $createTime = $cache->get('createTime');
 $updateTime = $cache->get('updateTime');

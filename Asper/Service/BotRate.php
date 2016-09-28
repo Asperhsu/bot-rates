@@ -6,10 +6,11 @@ use Asper\Contract\Cacheable;
 
 class BotRate {
 	protected $botSourceSite = "http://rate.bot.com.tw";
-	protected $botSourceUrl = "Pages/Static/UIP003.zh-TW.htm";
+	protected $botSourceUrl = "xrt/flcsv/0/day";
 	protected $csvColumnNameMapping = [
 		'currency'=>0, 'buyCash'=>2, 'buySpot'=>3, 'sellCash'=>12, 'sellSpot'=>13
 	];
+	protected $updateTime = 0;
 
 	public function __construct(){
 
@@ -19,59 +20,37 @@ class BotRate {
 		return $this->fetchRateFromSource();
 	}
 
-	protected function fetchSourceHtml(){
+	protected function fetchCSV(){
 		$url = implode('/', [$this->botSourceSite, $this->botSourceUrl] );
-		
-		try {
-			$html = file_get_contents($url);
-		} catch (Exception $e) {
-			die("Open Bot Url Failed");
-		}
 
-		return $html;
+		$opts = array(
+			'http'=>array(
+				'method'=>"GET",
+				'header'=>"Accept-language: en\r\n" .
+				"Host: rate.bot.com.tw\r\n"
+				)
+			);
+
+		$context = stream_context_create($opts);
+		$file = file_get_contents($url, false, $context);
+
+		$this->parseResponseHeaderUpdateTime($http_response_header);
+
+		return $file;
 	}
 
-	protected function findCSVUrl($html){
-		// find link element
-		$aPos = strpos($html, '<a id="DownloadCsv"');
-		$hrefPos = strpos($html, 'href="', $aPos);
-		$endPos = strpos($html, '">', $hrefPos);
-		
-		// get link attribute
-		$link = substr($html, $hrefPos+6, $endPos-$hrefPos-6);
-		$link = htmlspecialchars_decode($link);
-
-		return $link;
-	}
-
-	protected function parseUpdateTimeFromCSVLink($csvLink){
-		$datePos = strpos($csvLink, '&date=');
-		$dateLength = 6;
-		$dateString = substr($csvLink, $datePos + $dateLength);
-		$updateTime = strtotime($dateString);
-
-		return $updateTime;
-	}
-
-	protected function parseCSV($csvLink){
-		$url = implode('/', [$this->botSourceSite, $csvLink] );
-
-		try {
-			$fp = fopen($url, "r");
-		} catch (Exception $e) {
-			die("Open Bot CSV File Error");
-		}
-
-		$row = 0;
+	protected function parseCSV($csvContents){
 		$rates = [];
+		$rows = explode("\r\n", $csvContents);
 
-		while( ($data = fgetcsv($fp, 1000, ',')) !== FALSE ){
-			$row++; if($row == 1){ continue; }
+		foreach($rows as $index => $row){
+			if($index == 0){ continue; }
+
+			$data = explode(",", $row);
+			if( count($data) < 10 ){ continue; }
 
 			$rates += $this->parseCSVRow($data);
 		}
-
-		fclose($fp);
 
 		return $rates;
 	}
@@ -87,16 +66,27 @@ class BotRate {
 		return $rate;
 	}
 
-	public function fetchRateFromSource(){
-		$sourceHtml = $this->fetchSourceHtml();		
-		$csvLink = $this->findCSVUrl($sourceHtml);
-		$updateTime = $this->parseUpdateTimeFromCSVLink($csvLink);
+	protected function parseResponseHeaderUpdateTime($headers){
+		$str = '';
+		foreach($headers as $header){
+			if( strpos($header, 'content-disposition: attachment') === false ){ continue; }
 
-		$rates = $this->parseCSV($csvLink);
+			$matches = [];
+			preg_match('/ExchangeRate@(.*).csv/', $header, $matches);
+			
+			if( isset($matches[1]) ){
+				$this->updateTime = strtotime($matches[1]);
+			}
+		}
+	}
+
+	public function fetchRateFromSource(){
+		$csvContents = $this->fetchCSV();
+		$rates = $this->parseCSV($csvContents);
 
 		return [
 			'createTime' => time(),
-			'updateTime' => $updateTime,
+			'updateTime' => $this->updateTime,
 			'rates' => $rates
 		];
 	}

@@ -1,5 +1,5 @@
 cron:
 - description: update rate evenry 4 hour
   url: /update
-  schedule: every 4 hours from 12:30 to 16:30
+  schedule: every 4 hours from 13:00 to 17:00
   timezone: Asia/Taipei

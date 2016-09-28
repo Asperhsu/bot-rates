@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 date_default_timezone_set('Asia/Taipei');
 
 //retrive cache data
-$cache = new Asper\Util\MemCache();
+$cache = new Asper\Util\GSJsonCache();
 
 $createTime = $cache->get('createTime');
 $updateTime = $cache->get('updateTime');
