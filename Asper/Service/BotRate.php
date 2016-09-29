@@ -69,7 +69,7 @@ class BotRate {
 	protected function parseResponseHeaderUpdateTime($headers){
 		$str = '';
 		foreach($headers as $header){
-			if( strpos($header, 'content-disposition: attachment') === false ){ continue; }
+			if( strpos($header, 'attachment; filename') === false ){ continue; }
 
 			$matches = [];
 			preg_match('/ExchangeRate@(.*).csv/', $header, $matches);
