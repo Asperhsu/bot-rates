@@ -3,6 +3,7 @@ require("vendor/autoload.php");
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Taipei');
 
+
 //retrive cache data
 $cache = new Asper\Util\GSJsonCache();
 
@@ -33,6 +34,16 @@ if( isset($data['rates'][$currency]) ){
 }else{
 	$ret = $data;
 }
+
+//ga
+$analytics = new TheIconic\Tracking\GoogleAnalytics\Analytics(true);
+$analytics
+    ->setProtocolVersion('1')
+    ->setTrackingId('UA-55384149-5')
+    ->setClientId('55384149')
+    ->setDocumentPath('/currency.json')
+    ->setEventLabel($currency)
+    ->sendPageview();
 
 header('Content-Type: application/json');
 echo json_encode($ret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

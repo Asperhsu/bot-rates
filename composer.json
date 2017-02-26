@@ -9,5 +9,8 @@
 		"psr-4": {
 			"Asper\\" : "Asper"
 		}
-	}
+	},
+    "require": {
+        "theiconic/php-ga-measurement-protocol": "^2.4"
+    }
 }
